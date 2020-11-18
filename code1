@@ -1,0 +1,118 @@
+#include <SFML/Graphics.hpp>
+#include <time.h>
+#include <list>
+
+using namespace sf;
+
+const int W = 1200;
+const int H = 800;
+
+int body();
+
+
+int main()
+{
+    //set up the first window for beginning//
+    RenderWindow app0(VideoMode(W, H), "Utopia");
+    app0.setFramerateLimit(60);
+
+    //loading images for beginning//
+    Texture t00, t01,t02;
+    t00.loadFromFile("lana.JPG");
+    t00.setSmooth(true);
+    t01.loadFromFile("problem.jpg");
+    t01.setSmooth(true);
+    t02.loadFromFile("problem.jpg");
+    t02.setSmooth(true);
+    Sprite sBeginning00(t00);
+    Sprite sBeginning01(t01);
+    Sprite sBeginning02(t02);
+
+    //display the cover image//
+    app0.draw(sBeginning00);
+    app0.display();
+ 
+    while (app0.isOpen())
+    {
+        Event event0;
+        while (app0.pollEvent(event0))
+        {
+
+            if (event0.type == Event::Closed)
+                app0.close();
+         
+            //move on to the second image//
+            if (Keyboard::isKeyPressed(Keyboard::Space)) {
+                app0.clear();
+                app0.draw(sBeginning01);
+                app0.display();
+            }
+            //move on to the third image//
+            if (Keyboard::isKeyPressed(Keyboard::Enter)) {
+                app0.clear();
+                app0.draw(sBeginning02);
+                app0.display();
+            }
+            //move on to the main body of the game//
+            if (Keyboard::isKeyPressed(Keyboard::C)) {
+                body();
+                app0.close();
+            }
+        }
+    }
+    return 0;
+}
+
+
+int body() {
+    //set up the window for main body//
+    RenderWindow app(VideoMode(W, H), "Utopia");
+    app.setFramerateLimit(60);
+
+    //loading images for main body//
+    Texture t1, t2;
+    t1.loadFromFile("problem.jpg");
+    t2.loadFromFile("background.jpg");
+
+    t1.setSmooth(true);
+    t2.setSmooth(true);
+
+    Sprite sPlayer(t1);
+    Sprite sBackground(t2);
+    sPlayer.setTextureRect(IntRect(0, 0, 50, 50));
+    sPlayer.setOrigin(25, 25);
+    sPlayer.move(400, 400);
+
+    float angle = 0;
+
+    while (app.isOpen())
+    {
+        Event event;
+        while (app.pollEvent(event))
+        {
+
+            if (event.type == Event::Closed)
+                app.close();
+
+            //control the player//
+            if (Keyboard::isKeyPressed(Keyboard::Left)) sPlayer.move(-10, 0);
+            if (Keyboard::isKeyPressed(Keyboard::Right)) sPlayer.move(10, 0);
+            if (Keyboard::isKeyPressed(Keyboard::Up)) sPlayer.move(0, -10);
+            if (Keyboard::isKeyPressed(Keyboard::Down)) sPlayer.move(0, 10);
+            if (Keyboard::isKeyPressed(Keyboard::D)) {
+                sPlayer.rotate(3);
+                angle += 3;
+            }
+            if (Keyboard::isKeyPressed(Keyboard::A)) {
+                sPlayer.rotate(-3);
+                angle -= 3;
+            }
+
+        //display the updated window//
+        app.clear();
+        app.draw(sBackground);
+        app.draw(sPlayer);
+        app.display();
+    }
+    return 0;
+}
