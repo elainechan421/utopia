@@ -1,0 +1,177 @@
+#include <SFML/Graphics.hpp>
+#include <time.h>
+#include <list>
+#include<cmath>
+
+using namespace sf;
+
+const int W = 1200;
+const int H = 800;
+
+
+int body();
+
+////////////////////main/////////////////////////////////////////////////////////////////////
+int main()
+{
+    //set up the first window for beginning//
+    RenderWindow app0(VideoMode(W, H), "Utopia");
+    app0.setFramerateLimit(60);
+
+    //loading images for beginning//
+    Texture t00, t01,t02;
+    t00.loadFromFile("lana.JPG");
+    t00.setSmooth(true);
+    t01.loadFromFile("problem.jpg");
+    t01.setSmooth(true);
+    t02.loadFromFile("problem.jpg");
+    t02.setSmooth(true);
+    Sprite sBeginning00(t00);
+    Sprite sBeginning01(t01);
+    Sprite sBeginning02(t02);
+
+    //display the cover image//
+    app0.draw(sBeginning00);
+    app0.display();
+ 
+    while (app0.isOpen())
+    {
+        Event event0;
+        while (app0.pollEvent(event0))
+        {
+
+            if (event0.type == Event::Closed)
+                app0.close();
+         
+            //move on to the second image//
+            if (Keyboard::isKeyPressed(Keyboard::Space)) {
+                app0.clear();
+                app0.draw(sBeginning01);
+                app0.display();
+            }
+            //move on to the third image//
+            if (Keyboard::isKeyPressed(Keyboard::Enter)) {
+                app0.clear();
+                app0.draw(sBeginning02);
+                app0.display();
+            }
+            //move on to the main body of the game//
+            if (Keyboard::isKeyPressed(Keyboard::C)) {
+                body();
+                app0.close();
+            }
+        }
+    }
+
+
+ 
+    return 0;
+}
+
+
+int body() {
+
+    //set up the window for main body//
+    RenderWindow app(VideoMode(W, H), "Utopia");
+    app.setFramerateLimit(60);
+
+    //loading images for main body//
+    Texture t1,t2,t3;
+    t1.loadFromFile("problem.jpg");   ////image of player
+    t2.loadFromFile("background.jpg");  ////background
+    t3.loadFromFile("ship.png");  ////image of bullet
+    t1.setSmooth(true);
+    t2.setSmooth(true);
+    t3.setSmooth(true);
+
+    Sprite sPlayer(t1);
+    Sprite sBackground(t2);
+    Sprite sBullet(t3);
+
+    //////settings for player//////////////
+    sPlayer.setTextureRect(IntRect(0, 0, 50, 50));
+    sPlayer.setOrigin(25, 25);
+    sPlayer.move(400, 400);
+
+    //////////settings for bullet///////////
+    sBullet.setTextureRect(IntRect(0, 0, 50, 50));
+    float ang = 0;    
+    float xplayer = 375, yplayer = 375;   //400-25=375
+    float xbullet, ybullet;
+    bool bullet=0;        ////true if there is one bullet on the screen
+    bool nextbullet=1; ////true if the previous bullet hits a rumour or fly out of the screen
+    int bulletang;    ////record the angle when the bullet is shot
+    const float pi = 3.1415926;  //to conver degree into rad
+
+
+
+    while (app.isOpen()){
+        Event event;
+        while (app.pollEvent(event)) {
+
+            if (event.type == Event::Closed)
+                app.close();
+
+            /////////////////////control the player///////////////////////
+            if (Keyboard::isKeyPressed(Keyboard::Left)) {
+                sPlayer.move(-10, 0);
+                xplayer -= 10;
+            }
+            if (Keyboard::isKeyPressed(Keyboard::Right)) {
+                sPlayer.move(10, 0);
+                xplayer += 10;
+            }
+            if (Keyboard::isKeyPressed(Keyboard::Up)) {
+                sPlayer.move(0, -10);
+                yplayer -= 10;
+            }
+            if (Keyboard::isKeyPressed(Keyboard::Down)) {
+                sPlayer.move(0, 10);
+                yplayer += 10;
+            }
+            if (Keyboard::isKeyPressed(Keyboard::D)) {
+                sPlayer.rotate(3);
+                ang += 3;
+            }
+            if (Keyboard::isKeyPressed(Keyboard::A)) {
+                sPlayer.rotate(-3);
+                ang -= 3;
+            }
+
+            ////////////////////press space to shoot a bullet///////////////////////////////
+            if (Keyboard::isKeyPressed(Keyboard::Space) && nextbullet) {
+                xbullet = xplayer;
+                ybullet = yplayer;
+                bullet = 1;     //the bullet exist now
+                nextbullet = 0;  //cannot shoot another bullet now
+                sBullet.setPosition(xbullet, ybullet);
+                bulletang = ang;
+            }
+        }
+
+            /////////movement of the bullet/////////////////////
+        if (bullet) {
+                sBullet.move(2 * sin(pi*bulletang/180), -2 * cos(pi*bulletang/180));//adjust degree into rad
+                xbullet += 2 * sin(ang);          /////the speed of bullet is constant 2
+                ybullet += 2 * cos(ang);   
+                //////bullet fly outside the screen (diasppear)////////
+                if (xbullet > W || xbullet < 0) {
+                    bullet = 0;
+                    nextbullet = 1;
+                }
+                if (ybullet > H || ybullet < 0) {
+                    bullet = 0;
+                    nextbullet = 1;
+                }
+        }
+
+         /////out of the event loop/////
+        /////display the updated window////
+        app.clear(); //so that there will only be one image for each object(if exist)
+        app.draw(sBackground);
+        if (bullet) app.draw(sBullet);
+        app.draw(sPlayer);
+        app.display();
+    }
+    return 0;
+}
